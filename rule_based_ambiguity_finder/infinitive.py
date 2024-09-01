@@ -1,0 +1,1 @@
+infinitive_patterns = [[{"LOWER": "be"}, {"POS": "ADJ"}, {"LOWER": "to"}], [{"LOWER": "be"}, {"POS": "ADJ"}, {"POS": "ADP"}], [{"LOWER": "to"}, {"POS": "VERB"}]]

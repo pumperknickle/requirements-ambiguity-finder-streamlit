@@ -1,0 +1,12 @@
+combinator_patterns = [[{"ORTH": "and"}],
+                       [{"ORTH": "or"}],
+                       [{"LOWER": "then"}],
+                       [{"LOWER": "unless"}],
+                       [{"LOWER": "but"}],
+                       [{"LOWER": "also"}],
+                       [{"LOWER": "whether"}],
+                       [{"LOWER": "meanwhile"}],
+                       [{"LOWER": "whereas"}],
+                       [{"LOWER": "otherwise"}],
+                       [{"LOWER": "as"}, {"LOWER": "well"}, {"LOWER": "as"}],
+                       [{"LOWER": "on"}, {"LOWER": "the"}, {"LOWER": "other"}, {"LOWER": "hand"}]]

@@ -1,3 +1,5 @@
+from re import escape
+
 import spacy_streamlit
 import streamlit as st
 
@@ -7,6 +9,17 @@ from rule_based_ambiguity_finder.indefinite_article import indefinite_article_pa
 from rule_based_ambiguity_finder.negation import negation_patterns
 from rule_based_ambiguity_finder.temporal_dependencies import temporal_dep_patterns
 from rule_based_ambiguity_finder.passive_voice import passive_voice_patterns
+from rule_based_ambiguity_finder.pronoun import  pronoun_patterns
+from rule_based_ambiguity_finder.infinitive import infinitive_patterns
+from rule_based_ambiguity_finder.vague_term import vague_term_patterns
+from rule_based_ambiguity_finder.adverb import adverb_patterns
+from rule_based_ambiguity_finder.escape import escape_patterns
+from rule_based_ambiguity_finder.open_ended import open_ended_patterns
+from rule_based_ambiguity_finder.universal_qualitifcation import universal_qualification_patterns
+from rule_based_ambiguity_finder.unmeasurable import unmeasurable_patterns
+from rule_based_ambiguity_finder.combinator import combinator_patterns
+from rule_based_ambiguity_finder.unachievable_absolute import unachievable_absolute_patterns
+from rule_based_ambiguity_finder.purpose import purpose_patterns
 
 DEFAULT_TEXT = """Google was founded in September 1998 by Larry Page and Sergey Brin while they were Ph.D. students at Stanford University in California. Together they own about 14 percent of its shares and control 56 percent of the stockholder voting power through supervoting stock. They incorporated Google as a California privately held company on September 4, 1998, in California. Google was then reincorporated in Delaware on October 22, 2002."""
 
@@ -16,111 +29,62 @@ text = st.text_area("Enter requirement to analyze", DEFAULT_TEXT, height=200)
 nlp = spacy.load("en_core_web_sm")
 ruler = nlp.add_pipe("span_ruler")
 
-patterns = [{"label": "Pronoun", "pattern": [{"POS": "PRON"}]},
-            {"label": "Superfluous Infinitive", "pattern": [{"LOWER": "be"}, {"POS": "ADJ"}, {"LOWER": "to"}]},
-            {"label": "Superfluous Infinitive", "pattern": [{"LOWER": "be"}, {"POS": "ADJ"}, {"POS": "ADP"}]},
-            {"label": "Superfluous Infinitive", "pattern": [{"LOWER": "to"}, {"POS": "VERB"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "some"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "any"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "allowable"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "several"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "many"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "a"}, {"LOWER": "lot"}, {"LOWER": "of"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "a"}, {"LOWER": "few"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "almost"}, {"LOWER": "always"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "very"}, {"LOWER": "nearly"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "nearly"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "about"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "close"}, {"LOWER": "to"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "almost"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "approximate"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "ancillary"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "relevant"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "routine"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "common"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "typical"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "routine"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "generic"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "flexible"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "expandable"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "sufficient"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "adequate"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "appropriate"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "efficient"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "secure"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "effective"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "proficient"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "reasonable"}]},
-            {"label": "Vague Term", "pattern": [{"LOWER": "customary"}]},
-            {"label": "Vague Adverb", "pattern": [{"LOWER": "usually"}]},
-            {"label": "Vague Adverb", "pattern": [{"LOWER": "approximately"}]},
-            {"label": "Vague Adverb", "pattern": [{"LOWER": "sufficiently"}]},
-            {"label": "Vague Adverb", "pattern": [{"LOWER": "typically"}]},
-            {"label": "Vague Adverb", "pattern": [{"LOWER": "approximately"}]},
-            {"label": "Vague Adverb", "pattern": [{"POS": "ADV"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "so"}, {"LOWER": "far"}, {"LOWER": "as"}, {"LOWER": "is"}, {"LOWER": "possible"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "as"}, {"LOWER": "possible"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "as"}, {"LOWER": "little"}, {"LOWER": "as"}, {"LOWER": "possible"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "where"}, {"LOWER": "possible"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "as"}, {"LOWER": "much"}, {"LOWER": "as"}, {"LOWER": "possible"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "if"}, {"LOWER": "it"}, {"LOWER": "should"}, {"LOWER": "prove"}, {"LOWER": "necessary"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "to"}, {"LOWER": "the"}, {"LOWER": "extant"}, {"LOWER": "necessary"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "as"}, {"LOWER": "appropriate"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "as"}, {"LOWER": "required"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "to"}, {"LOWER": "the"}, {"LOWER": "extant"}, {"LOWER": "practical"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "if"}, {"LOWER": "practicable"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "as"}, {"LOWER": "necessary"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "if"}, {"LOWER": "necessary"}]},
-            {"label": "Escape Clause", "pattern": [{"LOWER": "if"}, {"LOWER": "possible"}]},
-            {"label": "Open Ended Clause", "pattern": [{"LOWER": "and"}, {"LOWER": "so"}, {"LOWER": "on"}]},
-            {"label": "Open Ended Clause", "pattern": [{"LOWER": "including"}, {"LOWER": "but"}, {"LOWER": "not"}, {"LOWER": "limited"}, {"LOWER": "to"}]},
-            {"label": "Open Ended Clause", "pattern": [{"LOWER": "etc"}]},
-            {"label": "Universal Qualification", "pattern": [{"LOWER": "all"}]},
-            {"label": "Universal Qualification", "pattern": [{"LOWER": "any"}]},
-            {"label": "Universal Qualification", "pattern": [{"LOWER": "both"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "prompt"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "fast"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "quick"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "rapid"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "minimum"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "maximum"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "minimum"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "optimum"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "nominal"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "easy"}, {"LOWER": "to"}, {"LOWER": "use"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "close"}, {"LOWER": "quickly"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "high"}, {"LOWER": "speed"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "best"}, {"LOWER": "practices"}]},
-            {"label": "Unmeasurable", "pattern": [{"LOWER": "user"}, {"LOWER": "friendly"}]},
-            {"label": "Combinator", "pattern": [{"ORTH": "and"}]},
-            {"label": "Combinator", "pattern": [{"ORTH": "or"}]},
-            {"label": "Combinator", "pattern": [{"LOWER": "then"}]},
-            {"label": "Combinator", "pattern": [{"LOWER": "unless"}]},
-            {"label": "Combinator", "pattern": [{"LOWER": "but"}]},
-            {"label": "Combinator", "pattern": [{"LOWER": "also"}]},
-            {"label": "Combinator", "pattern": [{"LOWER": "whether"}]},
-            {"label": "Combinator", "pattern": [{"LOWER": "meanwhile"}]},
-            {"label": "Combinator", "pattern": [{"LOWER": "whereas"}]},
-            {"label": "Combinator", "pattern": [{"LOWER": "otherwise"}]},
-            {"label": "Combinator", "pattern": [{"LOWER": "as"}, {"LOWER": "well"}, {"LOWER": "as"}]},
-            {"label": "Combinator", "pattern": [{"LOWER": "on"}, {"LOWER": "the"}, {"LOWER": "other"}, {"LOWER": "hand"}]},
-            {"label": "Unachievable Absolute", "pattern": [{"LOWER": "100%"}]},
-            {"label": "Unachievable Absolute", "pattern": [{"LOWER": "all"}]},
-            {"label": "Unachievable Absolute", "pattern": [{"LOWER": "every"}]},
-            {"label": "Unachievable Absolute", "pattern": [{"LOWER": "always"}]},
-            {"label": "Unachievable Absolute", "pattern": [{"LOWER": "never"}]},
-            {"label": "Purpose Phrase", "pattern": [{"LOWER": "purpose"}, {"LOWER": "of"}]},
-            {"label": "Purpose Phrase", "pattern": [{"LOWER": "intent"}, {"LOWER": "of"}]},
-            {"label": "Purpose Phrase", "pattern": [{"LOWER": "reason"}, {"LOWER": "for"}]}]
+patterns = []
 
-patterns.extend([{"label": "IndArt", "pattern": pat} for pat in indefinite_article_patterns])
-patterns.extend([{"label": "Neg", "pattern": pat} for pat in negation_patterns])
-patterns.extend([{"label": "TempDep", "pattern": pat} for pat in temporal_dep_patterns])
-patterns.extend([{"label": "Passive", "pattern": pat} for pat in passive_voice_patterns])
+indefinite_article_key = "IndArt"
+negation_key = "Neg"
+temporal_dependency_key = "TempDep"
+passive_key = "Passive"
+pronoun_key = "Pron"
+infinitive_key = "Inf"
+vague_term_key = "Vague"
+adverb_key = "Adverb"
+escape_clause_key = "Esc"
+open_ended_key = "OpenEnded"
+universal_qualification_key = "UniQual"
+unmeasurable_key = "Unmeas"
+combinator_key = "Cmbntr"
+unachievable_absolute_key = "UnAbs"
+purpose_key = "Purpose"
+
+patterns.extend([{"label": indefinite_article_key, "pattern": pat} for pat in indefinite_article_patterns])
+patterns.extend([{"label": negation_key, "pattern": pat} for pat in negation_patterns])
+patterns.extend([{"label": temporal_dependency_key, "pattern": pat} for pat in temporal_dep_patterns])
+patterns.extend([{"label": passive_key, "pattern": pat} for pat in passive_voice_patterns])
+patterns.extend([{"label": pronoun_key, "pattern": pat} for pat in pronoun_patterns])
+patterns.extend([{"label": infinitive_key, "pattern": pat} for pat in infinitive_patterns])
+patterns.extend([{"label": vague_term_key, "pattern": pat} for pat in vague_term_patterns])
+patterns.extend([{"label": adverb_key, "pattern": pat} for pat in adverb_patterns])
+patterns.extend([{"label": escape_clause_key, "pattern": pat} for pat in escape_patterns])
+patterns.extend([{"label": open_ended_key, "pattern": pat} for pat in open_ended_patterns])
+patterns.extend([{"label": universal_qualification_key, "pattern": pat} for pat in universal_qualification_patterns])
+patterns.extend([{"label": unmeasurable_key, "pattern": pat} for pat in unmeasurable_patterns])
+patterns.extend([{"label": combinator_key, "pattern": pat} for pat in combinator_patterns])
+patterns.extend([{"label": unachievable_absolute_key, "pattern": pat} for pat in unachievable_absolute_patterns])
+patterns.extend([{"label": purpose_key, "pattern": pat} for pat in purpose_patterns])
+
 ruler.add_patterns(patterns)
 doc = nlp(text)
 
+colors = {indefinite_article_key: "#DF2935",
+          negation_key: "#86BA90",
+          temporal_dependency_key: "#F5F3BB",
+          passive_key: "#DFA06E",
+          pronoun_key: "#412722",
+          infinitive_key: "#C94E4C",
+          vague_term_key: "#B37263",
+          adverb_key: "#BED7A6",
+          escape_clause_key: "#906448",
+          open_ended_key: "#9D967A",
+          universal_qualification_key: "#E2C044",
+          unmeasurable_key: "#9FB1BC",
+          combinator_key: "#FF7E6B",
+          unachievable_absolute_key: "#FFA69E",
+          purpose_key: "#A9F0D1"}
+
 visualize_spans(
-    doc, spans_key="ruler", displacy_options={"colors": {"Negation": "#09a3d5"}}
+    doc,
+    spans_key="ruler",
+    displacy_options={"colors": colors}
 )
 
