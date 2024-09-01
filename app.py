@@ -3,7 +3,7 @@ import streamlit as st
 
 import spacy
 from spacy_streamlit import visualize_spans
-
+from rule_based_ambiguity_finder.indefinite_article import indefinite_article_patterns
 
 DEFAULT_TEXT = """Google was founded in September 1998 by Larry Page and Sergey Brin while they were Ph.D. students at Stanford University in California. Together they own about 14 percent of its shares and control 56 percent of the stockholder voting power through supervoting stock. They incorporated Google as a California privately held company on September 4, 1998, in California. Google was then reincorporated in Delaware on October 22, 2002."""
 
@@ -13,9 +13,7 @@ text = st.text_area("Enter requirement to analyze", DEFAULT_TEXT, height=200)
 nlp = spacy.load("en_core_web_sm")
 ruler = nlp.add_pipe("span_ruler")
 
-patterns = [{"label": "Indefinite Article", "pattern": [{"LOWER": "a"}]},
-            {"label": "Indefinite Article", "pattern": [{"LOWER": "an"}]},
-            {"label": "Negation", "pattern": [{"ORTH": "not"}]},
+patterns = [{"label": "Negation", "pattern": [{"ORTH": "not"}]},
             {"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP': 'aux', 'OP': '*'}, {'DEP': 'auxpass'}, {'TAG': 'VBN'}]},
             {"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP': 'aux', 'OP': '*'}, {'DEP': 'auxpass'}, {'TAG': 'VBZ'}]},
             {"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP': 'aux', 'OP': '*'}, {'DEP': 'auxpass'}, {'TAG': 'RB'}, {'TAG': 'VBN'}]},
@@ -128,6 +126,7 @@ patterns = [{"label": "Indefinite Article", "pattern": [{"LOWER": "a"}]},
             {"label": "Purpose Phrase", "pattern": [{"LOWER": "intent"}, {"LOWER": "of"}]},
             {"label": "Purpose Phrase", "pattern": [{"LOWER": "reason"}, {"LOWER": "for"}]}]
 
+patterns.extend([{"label": "IndArt", "pattern": pat} for pat in indefinite_article_patterns])
 ruler.add_patterns(patterns)
 doc = nlp(text)
 
