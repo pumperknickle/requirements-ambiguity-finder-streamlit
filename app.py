@@ -6,6 +6,7 @@ from spacy_streamlit import visualize_spans
 from rule_based_ambiguity_finder.indefinite_article import indefinite_article_patterns
 from rule_based_ambiguity_finder.negation import negation_patterns
 from rule_based_ambiguity_finder.temporal_dependencies import temporal_dep_patterns
+from rule_based_ambiguity_finder.passive_voice import passive_voice_patterns
 
 DEFAULT_TEXT = """Google was founded in September 1998 by Larry Page and Sergey Brin while they were Ph.D. students at Stanford University in California. Together they own about 14 percent of its shares and control 56 percent of the stockholder voting power through supervoting stock. They incorporated Google as a California privately held company on September 4, 1998, in California. Google was then reincorporated in Delaware on October 22, 2002."""
 
@@ -15,10 +16,7 @@ text = st.text_area("Enter requirement to analyze", DEFAULT_TEXT, height=200)
 nlp = spacy.load("en_core_web_sm")
 ruler = nlp.add_pipe("span_ruler")
 
-patterns = [{"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP': 'aux', 'OP': '*'}, {'DEP': 'auxpass'}, {'TAG': 'VBN'}]},
-            {"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP': 'aux', 'OP': '*'}, {'DEP': 'auxpass'}, {'TAG': 'VBZ'}]},
-            {"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP': 'aux', 'OP': '*'}, {'DEP': 'auxpass'}, {'TAG': 'RB'}, {'TAG': 'VBN'}]},
-            {"label": "Pronoun", "pattern": [{"POS": "PRON"}]},
+patterns = [{"label": "Pronoun", "pattern": [{"POS": "PRON"}]},
             {"label": "Superfluous Infinitive", "pattern": [{"LOWER": "be"}, {"POS": "ADJ"}, {"LOWER": "to"}]},
             {"label": "Superfluous Infinitive", "pattern": [{"LOWER": "be"}, {"POS": "ADJ"}, {"POS": "ADP"}]},
             {"label": "Superfluous Infinitive", "pattern": [{"LOWER": "to"}, {"POS": "VERB"}]},
@@ -118,6 +116,7 @@ patterns = [{"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP':
 patterns.extend([{"label": "IndArt", "pattern": pat} for pat in indefinite_article_patterns])
 patterns.extend([{"label": "Neg", "pattern": pat} for pat in negation_patterns])
 patterns.extend([{"label": "TempDep", "pattern": pat} for pat in temporal_dep_patterns])
+patterns.extend([{"label": "Passive", "pattern": pat} for pat in passive_voice_patterns])
 ruler.add_patterns(patterns)
 doc = nlp(text)
 
