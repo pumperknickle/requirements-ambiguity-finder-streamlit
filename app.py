@@ -4,6 +4,8 @@ import streamlit as st
 import spacy
 from spacy_streamlit import visualize_spans
 from rule_based_ambiguity_finder.indefinite_article import indefinite_article_patterns
+from rule_based_ambiguity_finder.negation import negation_patterns
+from rule_based_ambiguity_finder.temporal_dependencies import temporal_dep_patterns
 
 DEFAULT_TEXT = """Google was founded in September 1998 by Larry Page and Sergey Brin while they were Ph.D. students at Stanford University in California. Together they own about 14 percent of its shares and control 56 percent of the stockholder voting power through supervoting stock. They incorporated Google as a California privately held company on September 4, 1998, in California. Google was then reincorporated in Delaware on October 22, 2002."""
 
@@ -13,8 +15,7 @@ text = st.text_area("Enter requirement to analyze", DEFAULT_TEXT, height=200)
 nlp = spacy.load("en_core_web_sm")
 ruler = nlp.add_pipe("span_ruler")
 
-patterns = [{"label": "Negation", "pattern": [{"ORTH": "not"}]},
-            {"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP': 'aux', 'OP': '*'}, {'DEP': 'auxpass'}, {'TAG': 'VBN'}]},
+patterns = [{"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP': 'aux', 'OP': '*'}, {'DEP': 'auxpass'}, {'TAG': 'VBN'}]},
             {"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP': 'aux', 'OP': '*'}, {'DEP': 'auxpass'}, {'TAG': 'VBZ'}]},
             {"label": "Passive Voice", "pattern": [{'DEP': 'nsubjpass'}, {'DEP': 'aux', 'OP': '*'}, {'DEP': 'auxpass'}, {'TAG': 'RB'}, {'TAG': 'VBN'}]},
             {"label": "Pronoun", "pattern": [{"POS": "PRON"}]},
@@ -93,18 +94,6 @@ patterns = [{"label": "Negation", "pattern": [{"ORTH": "not"}]},
             {"label": "Unmeasurable", "pattern": [{"LOWER": "high"}, {"LOWER": "speed"}]},
             {"label": "Unmeasurable", "pattern": [{"LOWER": "best"}, {"LOWER": "practices"}]},
             {"label": "Unmeasurable", "pattern": [{"LOWER": "user"}, {"LOWER": "friendly"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "eventually"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "until"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "before"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "after"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "then"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "as"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "once"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "earliest"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "latest"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "instantaneous"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "simultaneous"}]},
-            {"label": "Temporal Dependency", "pattern": [{"LOWER": "at"}, {"LOWER": "last"}]},
             {"label": "Combinator", "pattern": [{"ORTH": "and"}]},
             {"label": "Combinator", "pattern": [{"ORTH": "or"}]},
             {"label": "Combinator", "pattern": [{"LOWER": "then"}]},
@@ -127,6 +116,8 @@ patterns = [{"label": "Negation", "pattern": [{"ORTH": "not"}]},
             {"label": "Purpose Phrase", "pattern": [{"LOWER": "reason"}, {"LOWER": "for"}]}]
 
 patterns.extend([{"label": "IndArt", "pattern": pat} for pat in indefinite_article_patterns])
+patterns.extend([{"label": "Neg", "pattern": pat} for pat in negation_patterns])
+patterns.extend([{"label": "TempDep", "pattern": pat} for pat in temporal_dep_patterns])
 ruler.add_patterns(patterns)
 doc = nlp(text)
 
