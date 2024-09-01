@@ -1,0 +1,1 @@
+temporal_dep_patterns = [[{"LOWER": "eventually"}],[{"LOWER": "until"}],[{"LOWER": "before"}],[{"LOWER": "after"}],[{"LOWER": "then"}],[{"LOWER": "as"}],[{"LOWER": "once"}],[{"LOWER": "earliest"}],[{"LOWER": "latest"}],[{"LOWER": "instantaneous"}],[{"LOWER": "simultaneous"}],[{"LOWER": "at"}, {"LOWER": "last"}]]
