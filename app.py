@@ -21,7 +21,7 @@ from rule_based_ambiguity_finder.combinator import combinator_patterns
 from rule_based_ambiguity_finder.unachievable_absolute import unachievable_absolute_patterns
 from rule_based_ambiguity_finder.purpose import purpose_patterns
 
-DEFAULT_TEXT = """Google was founded in September 1998 by Larry Page and Sergey Brin while they were Ph.D. students at Stanford University in California. Together they own about 14 percent of its shares and control 56 percent of the stockholder voting power through supervoting stock. They incorporated Google as a California privately held company on September 4, 1998, in California. Google was then reincorporated in Delaware on October 22, 2002."""
+DEFAULT_TEXT = "The system must allow blog visitors to sign up for the newsletter by leaving their email."
 
 st.title("Requirements Ambiguity Detector")
 text = st.text_area("Enter requirement to analyze", DEFAULT_TEXT, height=200)
