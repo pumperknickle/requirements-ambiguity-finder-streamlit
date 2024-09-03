@@ -32,7 +32,7 @@ chat = model.start_chat()
 
 DEFAULT_TEXT = "The system must allow blog visitors to sign up for the newsletter by leaving their email."
 
-st.title("Requirements Ambiguity Detector")
+st.title("Requirements Analyzer")
 text = st.text_area("Enter requirement to analyze", DEFAULT_TEXT, height=200)
 
 nlp = spacy.load("en_core_web_sm")
@@ -91,13 +91,6 @@ colors = {indefinite_article_key: "#DF2935",
           unachievable_absolute_key: "#FFA69E",
           purpose_key: "#A9F0D1"}
 
-prompt = "Describe technical acceptance tests that will validate the requirement \"" + text + "\""
-result = chat.send_message(prompt, stream=True)
-st.subheader("Generated Acceptance Criteria: ")
-allText = ""
-for word in result:
-    allText = allText + word.text
-st.markdown(allText)
 
 st.subheader("Detected INCOSE Requirement Ambiguities: ")
 
@@ -106,4 +99,24 @@ visualize_spans(
     spans_key="ruler",
     displacy_options={"colors": colors}
 )
+
+prompt = "Explain the following requirement ambiguities \"" + text + "\" and rewrite the requirement so it is not ambiguous."
+result = chat.send_message(prompt, stream=True)
+st.subheader("Semantic Ambiguity Reasoning: ")
+allText = ""
+for word in result:
+    allText = allText + word.text
+st.markdown(allText)
+
+prompt = "Describe technical acceptance tests that will validate the requirement \"" + text + "\""
+result = chat.send_message(prompt, stream=True)
+st.subheader("Generated Acceptance Criteria: ")
+allText = ""
+for word in result:
+    allText = allText + word.text
+st.markdown(allText)
+
+
+
+
 
