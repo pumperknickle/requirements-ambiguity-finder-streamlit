@@ -1,9 +1,10 @@
-from re import escape
-
 import spacy_streamlit
 import streamlit as st
+import os
 
 import spacy
+import os
+import google.generativeai as ggi
 from spacy_streamlit import visualize_spans
 from rule_based_ambiguity_finder.indefinite_article import indefinite_article_patterns
 from rule_based_ambiguity_finder.negation import negation_patterns
@@ -20,6 +21,14 @@ from rule_based_ambiguity_finder.unmeasurable import unmeasurable_patterns
 from rule_based_ambiguity_finder.combinator import combinator_patterns
 from rule_based_ambiguity_finder.unachievable_absolute import unachievable_absolute_patterns
 from rule_based_ambiguity_finder.purpose import purpose_patterns
+
+google_api_key = os.environ.get("GOOGLE_API_KEY")
+
+ggi.configure(api_key = google_api_key)
+
+model = ggi.GenerativeModel("gemini-1.5-flash")
+chat = model.start_chat()
+
 
 DEFAULT_TEXT = "The system must allow blog visitors to sign up for the newsletter by leaving their email."
 
@@ -81,6 +90,16 @@ colors = {indefinite_article_key: "#DF2935",
           combinator_key: "#FF7E6B",
           unachievable_absolute_key: "#FFA69E",
           purpose_key: "#A9F0D1"}
+
+prompt = "Describe technical acceptance tests that will validate the requirement \"" + text + "\""
+result = chat.send_message(prompt, stream=True)
+st.subheader("Generated Acceptance Criteria: ")
+allText = ""
+for word in result:
+    allText = allText + word.text
+st.markdown(allText)
+
+st.subheader("Detected INCOSE Requirement Ambiguities: ")
 
 visualize_spans(
     doc,
